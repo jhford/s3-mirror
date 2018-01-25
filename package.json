@@ -4,5 +4,12 @@
   "description": "Mirror S3 objects",
   "main": "index.js",
   "author": "John Ford <john@johnford.org>",
-  "license": "MPL-2.0"
+  "license": "MPL-2.0",
+  "dependencies": {
+    "sqs-simple": "^1.3.0",
+    "taskcluster-lib-api": "^5.0.0",
+    "taskcluster-lib-app": "^3.0.0",
+    "taskcluster-lib-loader": "^2.0.0",
+    "typed-env-config": "^2.0.0"
+  }
 }
