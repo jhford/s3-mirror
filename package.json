@@ -6,10 +6,10 @@
   "author": "John Ford <john@johnford.org>",
   "license": "MPL-2.0",
   "dependencies": {
+    "express": "^4.16.2",
     "sqs-simple": "^1.3.0",
-    "taskcluster-lib-api": "^5.0.0",
-    "taskcluster-lib-app": "^3.0.0",
     "taskcluster-lib-loader": "^2.0.0",
+    "taskcluster-lib-log": "^2.0.2",
     "typed-env-config": "^2.0.0"
   }
 }
