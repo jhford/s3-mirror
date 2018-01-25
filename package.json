@@ -1,0 +1,8 @@
+{
+  "name": "s3-mirror",
+  "version": "1.0.0",
+  "description": "Mirror S3 objects",
+  "main": "index.js",
+  "author": "John Ford <john@johnford.org>",
+  "license": "MPL-2.0"
+}
