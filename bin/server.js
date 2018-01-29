@@ -1,13 +1,13 @@
 const assert = require('assert');
-const log = require('./log');
 const express = require('express');
+const redis = require('redis');
 const aws = require('aws-sdk');
-const queues = require('./queues');
 
 const cfg = require('typed-env-config')();
-const redis = require('redis');
 
-const {serializeKey, parseKey} = require('./cache');
+const log = require('../lib/log');
+const queues = require('../lib/queues');
+const {serializeKey, parseKey} = require('../lib/cache');
 
 const port = process.env.PORT || 8080;
 
