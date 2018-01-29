@@ -1,0 +1,8 @@
+defaults:
+  cache:
+    defaultExpiration: 86400000 # 24 hours
+  postgres:
+    databaseUrl: !env DATABASE_URL
+development:
+  postgres:
+    databaseUrl: 'postgres://testing@localhost:5432/testing'
