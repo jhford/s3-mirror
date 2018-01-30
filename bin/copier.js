@@ -83,7 +83,6 @@ async function pollToCopy() {
 async function start() {
   while (true) {
     try {
-      console.log('poll!');
       await pollToCopy();
     } catch (err) {
       log.error(err, 'polling error');
