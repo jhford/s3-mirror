@@ -1,8 +1,11 @@
 defaults:
-  cache:
-    defaultExpiration: 86400000 # 24 hours
+  app:
+    canonicalRegion: us-west-2
   postgres:
     databaseUrl: !env DATABASE_URL
+  bucketConfig: {}
 development:
   postgres:
     databaseUrl: 'postgres://testing@localhost:5432/testing'
+  bucketConfig:
+    us-east-1: 'artifact-clone-use1' 

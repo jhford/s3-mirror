@@ -6,7 +6,7 @@ const db = DB.db();
 
 const {copy} = require('../lib/s3');
 
-async function pollToCopy() {
+async function poll() {
   let client = await db.connect();
 
   // Start a transaction
@@ -62,7 +62,7 @@ async function pollToCopy() {
 
     // Do the copy
     try {
-      await copy();
+      await copy({region: artifact.region, bucket: artifact.bucket, object: artifact.object});
     } catch (err) {
       await db.query({
         text: "UPDATE artifacts SET started = $1, state = 'pending' WHERE region = $2 AND bucket = $3 AND object = $4;",
@@ -77,6 +77,11 @@ async function pollToCopy() {
     });
 
   }
+}
+
+async multiPoll(n) {
+  
+
 }
 
 

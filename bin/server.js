@@ -9,6 +9,7 @@ const {
   assertValidBucket,
   assertValidObject,
   assertValidRegion,
+  computeCachedLocation,
 } = require('../lib/s3');
 
 // Access the configuration
@@ -26,7 +27,7 @@ const db = DB.db();
 // catch, I've made it a function which will be called by the actual request
 // handler which will try/catch it, for error logging
 async function handleRedirect(req, res) {
-  let region = assertValidRegion({region: req.params.region});
+  let sourceRegion = assertValidRegion({region: cfg.app.canonicalRegion});
   let bucket = assertValidBucket({bucket: req.params.bucket});
   let object = assertValidObject({object: req.params.object});
 
@@ -42,9 +43,9 @@ async function handleRedirect(req, res) {
 
   // We need to figure out where this request is coming from.  This will be
   // able to tell us where it's going to end up going in the end
-  let requestRegion;
+  let region;
   try {
-    requestRegion = await regionForIp({ip: req.ip});
+    region = await regionForIp({ip: req.ip});
   } catch (err) {
     req.status(500).send('cannot determine source of request\n');
     log.error(err, 'determining location');
@@ -54,8 +55,14 @@ async function handleRedirect(req, res) {
   // Determine the canonical url for the artifact
   let canonicalUrl = createUrl({region, bucket, object});
 
-  // Determine the url of where we're copying to
-  let copiedUrl = createUrl({region: requestRegion, bucket: bucket + '-' + requestRegion, object});
+  // Determine the location and url of where we're copying to
+  let copiedLocation = computeCachedLocation({
+    region,
+    bucket,
+    object,
+  });
+
+  let copiedUrl = createUrl(copiedLocation);
 
   let client = await db.connect();
 
@@ -89,11 +96,13 @@ async function handleRedirect(req, res) {
       await client.query('ROLLBACK');
       throw err;
     } finally {
-      log.info({region, bucket, object, canonicalUrl, copiedUrl}, 'found artifact in cache, redirecting');
+      log.info({canonicalUrl, copiedUrl}, 'found artifact in cache, redirecting');
       client.release();
       return res.redirect(copiedUrl);
     }
   }
+
+  // TODO: Handle the case that something has been pending for a very long time.
 
   // If the artifact is *not* in the database, we want to insert it using the
   // same transaction
@@ -103,7 +112,7 @@ async function handleRedirect(req, res) {
         text: 'INSERT INTO artifacts (region, bucket, object) VALUES ($1, $2, $3);',
         values: [region, bucket, object],
       });
-      log.info({region, bucket, object, canonicalUrl, copiedUrl}, 'requesting copy');
+      log.info({canonicalUrl, copiedUrl}, 'requesting copy');
     } catch (err) {
       await client.query('ROLLBACK');
       client.release();
@@ -146,7 +155,7 @@ async function handleRedirect(req, res) {
 
 }
 
-app.get('/:region/:bucket/:object/:error*?', async (req, res) => {
+app.get('/:bucket/:object/:error*?', async (req, res) => {
   try {
     await handleRedirect(req, res);
   } catch (err) {
